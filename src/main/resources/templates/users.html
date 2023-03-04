@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+<form action="/users/new">
+    <input type="submit" value="Create user!"/>
+</form>
+<br/>
+<div th:each="user : ${users}">
+    <a th:href="@{users/{id}(id=${user.getId()})}" th:text="${user.getId()}+' '+ ${user.getEmail()}"></a>
+</div>
+</body>
+</html>
