@@ -5,12 +5,12 @@
     <title>Users</title>
 </head>
 <body>
-<form action="/users/new">
+<form th:action="@{/admin/new}">
     <input type="submit" value="Create user!"/>
 </form>
 <br/>
 <div th:each="user : ${users}">
-    <a th:href="@{users/{id}(id=${user.getId()})}" th:text="${user.getId()}+' '+ ${user.getEmail()}"></a>
+    <a th:href="@{/admin/{id}(id=${user.getId()})}" th:text="${user.getId()}+' '+ ${user.getEmail()}"></a>
 </div>
 </body>
 </html>
