@@ -34,7 +34,7 @@ public class UserValidator implements Validator {
             errors.rejectValue("username", "", "Пустое имя пользователя");
         }
 
-        if (validatorService.loadUserByUsername(user.getUsername()).isPresent()) {
+        if (validatorService.loadUserByName(user.getUsername()).isPresent()) {
             errors.rejectValue("username", "", "Пользователь с таким именем существует");
         }
     }

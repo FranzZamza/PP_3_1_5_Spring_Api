@@ -13,8 +13,7 @@ public class UserValidatorService {
     public UserValidatorService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    @Transactional
-    public Optional<User> loadUserByUsername(String username) {
+    public Optional<User> loadUserByName(String username) {
         return userRepository.findByUsername(username);
     }
 }

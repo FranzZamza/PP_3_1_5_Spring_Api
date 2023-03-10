@@ -1,15 +1,15 @@
 package ru.kata.spring.boot_security.demo.model;
 
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.kata.spring.boot_security.demo.security.Role;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Entity
@@ -25,10 +25,12 @@ public class User implements UserDetails {
     @NotEmpty(message = "password is empty!")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Fetch(FetchMode.JOIN)
     private Collection<Role> roles;
 
     public User() {
@@ -51,10 +53,9 @@ public class User implements UserDetails {
         this.password = password;
         this.roles = roles;
     }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return mapRolesToAuthorities(roles);
+        return mapRolesToAuthorities(getRoles());
     }
 
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {

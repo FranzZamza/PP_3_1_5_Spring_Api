@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.security;
+package ru.kata.spring.boot_security.demo.model;
 
 import org.springframework.security.core.GrantedAuthority;
 
@@ -18,7 +18,6 @@ public class Role implements GrantedAuthority {
 
     public Role() {
     }
-
     public Role(String role) {
         this.role = role;
     }

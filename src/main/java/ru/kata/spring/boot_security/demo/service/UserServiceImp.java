@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.service;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.User;
@@ -11,13 +12,11 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-public class UserServiceImp implements UserService {
+public class UserServiceImp implements  UserService  {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImp(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImp(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -38,7 +37,7 @@ public class UserServiceImp implements UserService {
     @Override
     @Transactional
     public void save(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -46,7 +45,7 @@ public class UserServiceImp implements UserService {
     @Transactional
     public void update(Long id, User user) {
         user.setId(id);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -54,5 +53,13 @@ public class UserServiceImp implements UserService {
     @Transactional
     public void delete(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty())
+            throw new UsernameNotFoundException("User not found");
+        return user.get();
     }
 }
