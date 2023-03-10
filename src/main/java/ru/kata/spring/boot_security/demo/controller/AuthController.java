@@ -10,9 +10,6 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RegistrationService;
 import ru.kata.spring.boot_security.demo.validator.UserValidator;
 
-import javax.validation.Valid;
-
-
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
