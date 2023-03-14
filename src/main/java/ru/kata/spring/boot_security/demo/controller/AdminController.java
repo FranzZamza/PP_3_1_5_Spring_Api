@@ -11,23 +11,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.security.Principal;
+
 @Controller
 @RequestMapping(value = "/admin")
 public class AdminController {
     private final UserService userService;
+
     public AdminController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping
-    public String getUsers(Model model) {
+    @GetMapping()
+    public String getUsers(Model model, Principal principal) {
         model.addAttribute("users", userService.getUsers());
+        if (userService.getUserByUsername(principal.getName()).isPresent()) {
+            model.addAttribute("user", userService.getUserByUsername(principal.getName()).get());
+        }
+        model.addAttribute("newUser", new User());
         return "users";
     }
 
     @GetMapping("/new")
     public String newUser(@ModelAttribute("user") User user) {
-        return "new";
+        return "/new";
     }
 
     @GetMapping("/{id}")

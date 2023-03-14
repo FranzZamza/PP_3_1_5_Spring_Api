@@ -26,6 +26,10 @@ public class UserValidator implements Validator {
             errors.rejectValue("password", "", "Пустой пароль!");
         }
 
+        if (user.getLastname().isEmpty()) {
+            errors.rejectValue("lastname", "", "Осутствует фамилия пользователя");
+        }
+
         if (user.getEmail().isEmpty()) {
             errors.rejectValue("email", "", "Пустой email!");
         }
@@ -34,8 +38,13 @@ public class UserValidator implements Validator {
             errors.rejectValue("username", "", "Пустое имя пользователя");
         }
 
+        if (user.getAge() == null) {
+            errors.rejectValue("age", "", "Пустое поле с возрастом");
+        }
+
         if (validatorService.loadUserByName(user.getUsername()).isPresent()) {
             errors.rejectValue("username", "", "Пользователь с таким именем существует");
         }
+
     }
 }

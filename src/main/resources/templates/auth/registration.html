@@ -12,18 +12,36 @@
         Username error
     </div>
     <br/>
+
+    <label for="lastname">Введите фамилию пользователя:</label>
+    <input type="text" th:field="*{lastname}" id="lastname"/>
+    <div style="color: red" th:if="${#fields.hasErrors('lastname')}" th:errors="*{lastname}">
+        Lastname error
+    </div>
+    <br/>
+
+    <label for="age">Введите фамилию пользователя:</label>
+    <input type="text" th:field="*{age}" id="age"/>
+    <div style="color: red" th:if="${#fields.hasErrors('age')}" th:errors="*{age}">
+        Age error
+    </div>
+    <br/>
+
+
     <label for="email">Введите email:</label>
     <input type="text" th:field="*{email}" id="email"/>
     <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
         Email error
     </div>
     <br/>
+
     <label for="password">Введите пароль:</label>
     <input type="password" th:field="*{password}" id="password"/>
     <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
         Password error
     </div>
     <br/>
+
     <input type="submit" value="Sign up">
 </form>
 </body>

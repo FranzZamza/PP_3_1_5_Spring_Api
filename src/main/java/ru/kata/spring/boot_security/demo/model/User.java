@@ -1,12 +1,10 @@
 package ru.kata.spring.boot_security.demo.model;
 
-
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -19,6 +17,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,13 @@ public class User implements UserDetails {
     private String email;
     @NotEmpty(message = "username is empty!")
     private String username;
+    @NotEmpty(message = "lastname is empty")
+    private String lastname;
+
+    @NotEmpty(message = "age is empty")
+    @Size(max = 110, message = "too old")
+    private Integer age;
+
     @NotEmpty(message = "password is empty!")
     private String password;
 
@@ -46,42 +52,33 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String email, String username) {
+    public User(String email, String username, String lastname, Integer age, String password, Collection<Role> roles) {
         this.email = email;
         this.username = username;
-    }
-
-    public User(String email, String username, String password) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
-    }
-
-    public User(String email, String username, String password, Collection<Role> roles) {
-        this.email = email;
-        this.username = username;
+        this.lastname = lastname;
+        this.age = age;
         this.password = password;
         this.roles = roles;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return mapRolesToAuthorities(getRoles());
     }
 
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
-        return roles.stream().map(x -> new SimpleGrantedAuthority(x.getRole())).collect(Collectors.toList());
+        return roles
+                .stream()
+                .map(x -> new SimpleGrantedAuthority(x.getRole()))
+                .collect(Collectors.toList());
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
-    }
-
-    public String getPassword() {
-        return password;
+    public String getRolesName() {
+        return mapRolesToAuthorities(roles)
+                .stream()
+                .map(Object::toString)
+                .map(x -> x.replaceAll("ROLE_", ""))
+                .collect(Collectors.joining(", "));
     }
 
     @Override
@@ -108,6 +105,36 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
 
     public void setPassword(String password) {
         this.password = password;
