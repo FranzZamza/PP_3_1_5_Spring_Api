@@ -42,7 +42,6 @@ public class AdminController {
     private String show(@PathVariable("id") Long id, Model model) {
         if (userService.getUserById(id).isPresent()) {
             model.addAttribute("user", userService.getUserById(id).get());
-            return "/show";
         }
         return "redirect:/admin";
     }
@@ -51,7 +50,6 @@ public class AdminController {
     public String edit(Model model, @PathVariable("id") Long id) {
         if (userService.getUserById(id).isPresent()) {
             model.addAttribute("user", userService.getUserById(id).get());
-            return "/edit";
         }
         return "redirect:/admin";
     }
