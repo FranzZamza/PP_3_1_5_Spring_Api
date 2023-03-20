@@ -1,48 +1,81 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Registration</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta name="_csrf" th:content="${_csrf.token}" th:value="${_csrf.token}">
 </head>
 <body>
-<form th:method="POST" th:action="@{/auth/registration}" th:object="${user}">
+<form id="registration_form" method="post">
     <label for="username">Введите имя пользователя:</label>
-    <input type="text" th:field="*{username}" id="username"/>
-    <div style="color: red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">
-        Username error
-    </div>
+    <input type="text" id="username"/>
     <br/>
 
     <label for="lastname">Введите фамилию пользователя:</label>
-    <input type="text" th:field="*{lastname}" id="lastname"/>
-    <div style="color: red" th:if="${#fields.hasErrors('lastname')}" th:errors="*{lastname}">
-        Lastname error
-    </div>
+    <input type="text" id="lastname"/>
     <br/>
 
-    <label for="age">Введите фамилию пользователя:</label>
-    <input type="text" th:field="*{age}" id="age"/>
-    <div style="color: red" th:if="${#fields.hasErrors('age')}" th:errors="*{age}">
-        Age error
-    </div>
+    <label for="age">Введите ваш возраст:</label>
+    <input type="number" id="age"/>
     <br/>
-
 
     <label for="email">Введите email:</label>
-    <input type="text" th:field="*{email}" id="email"/>
-    <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
-        Email error
-    </div>
+    <input type="email" id="email"/>
     <br/>
 
     <label for="password">Введите пароль:</label>
-    <input type="password" th:field="*{password}" id="password"/>
-    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
-        Password error
-    </div>
-    <br/>
+    <input type="password" id="password"/>
 
+    <br/>
     <input type="submit" value="Sign up">
 </form>
+
+<script>
+    $(document).ready(function () {
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-Token': $('meta[name="_csrf"]').attr('content')
+            }
+        });
+
+        $('form').submit(function (event) {
+            event.preventDefault();
+            const username = $('#username').val();
+            const email = $('#email').val();
+            const password = $('#password').val();
+            const age = $('#age').val();
+            const lastname = $('#lastname').val()
+
+            let data = {
+                'username': username,
+                'email': email,
+                'password': password,
+                'age': age,
+                'lastname': lastname
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/api/auth/registration',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
 </html>

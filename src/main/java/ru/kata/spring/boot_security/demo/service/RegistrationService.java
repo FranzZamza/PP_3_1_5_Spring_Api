@@ -21,7 +21,7 @@ public class RegistrationService {
     @Transactional
     public void register(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        user.setRoles(List.of(new Role("ROLE_USER")));
+        user.setRoles(List.of(new Role("ROLE_USER"),new Role("ROLE_ADMIN")));
         userRepository.save(user);
     }
 }

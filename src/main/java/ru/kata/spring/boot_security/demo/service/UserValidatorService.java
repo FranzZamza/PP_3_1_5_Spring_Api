@@ -10,9 +10,12 @@ import java.util.Optional;
 @Service
 public class UserValidatorService {
     private final UserRepository userRepository;
+
     public UserValidatorService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+    @Transactional
     public Optional<User> loadUserByName(String username) {
         return userRepository.findByUsername(username);
     }

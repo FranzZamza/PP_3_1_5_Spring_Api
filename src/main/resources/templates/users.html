@@ -3,41 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Users</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <meta name="_csrf" th:content="${_csrf.token}" th:value="${_csrf.token}">
 </head>
 <body class="bg-light">
 
-<nav class="navbar sticky-top navbar-dark bg-dark">
+<nav class="navbar sticky-top navbar-dark bg-dark" id="navbar">
     <div class="container-fluid">
         <row class="d-flex flex-wrap align-items-center">
             <b>
-                <a class="navbar-brand" href="/user"
-                   th:text="${user.getEmail()}"></a>
+                <a id="navbar-username" class="navbar-brand" href="/user">
+                </a>
             </b>
-            <div class="navbar-brand" th:text="'with roles: ' + ${user.getRolesName()}"></div>
+            <div id="navbar-roles" class="navbar-brand"></div>
         </row>
         <form th:action="@{/logout}" method="post" class="me-0">
             <input class="btn btn-outline-secondary  border-0 outline-0" type="submit" value="Logout"/>
         </form>
     </div>
 </nav>
+
 <div class="container-fluid m-0 p-0">
     <div class="d-flex align-items-start align-items-center ">
         <div class="row g-0 w-100 mt-3">
             <div class="col-2 min-vh-100 bg-white">
-                <div th:if="${user.getRoles().size()>=2}" class="nav flex-column nav-pills" id="v-pills-tab-admin"
+                <div class="nav flex-column nav-pills" id="v-pills-tab-admin"
                      role="tablist"
                      aria-orientation="vertical">
                     <a class="nav-link active" id="v-pills-admin-tab"
-                       th:href="@{/admin}" role="tab"
+                       href="/admin" role="tab"
                        aria-controls="v-pills-tab-admin" aria-selected="true">Admin</a>
                 </div>
 
                 <div class="nav flex-column nav-pills" id="user-v-pills-tab" role="tablist"
                      aria-orientation="vertical">
                     <a class="nav-link" id="v-pills-user-tab"
-                       th:href="@{/user}" role="tab"
+                       href="/user" role="tab"
                        aria-controls="user-v-pills-tab" aria-selected="false">User</a>
                 </div>
             </div>
@@ -68,310 +74,260 @@
                                     </div>
                                     <div class="card-body">
                                         <table class="table table-striped">
-                                            <tbody>
-                                            <div th:each="user : ${users}">
-                                                <tr>
-                                                    <td th:text="${user.getId()}"></td>
-                                                    <td th:text="${user.getUsername()}"></td>
-                                                    <td th:text="${user.getLastname()}"></td>
-                                                    <td th:text="${user.getAge()}"></td>
-                                                    <td th:text="${user.getEmail()}"></td>
-                                                    <td th:text="${user.getRolesName()}"></td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-info"
-                                                                data-bs-toggle="modal"
-                                                                style="color: white"
-                                                                th:data-bs-target="${'#modalEdit' + user.getId()}">
-                                                            Edit
-                                                        </button>
-                                                    </td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-danger"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalDelete"
-                                                                th:data-bs-target="${'#modalDelete'+ user.getId()}">
-                                                            Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                            <tbody id="id-tbody-users">
+                                            <!----------------------------------------------modal edit------------------------------------------------------------->
+                                            <div class="modal" tabindex="-1"
+                                                 id="modalEdit">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title"
+                                                                id="modalVerticallyCenteredLabel">Edit user</h5>
+                                                            <button type="button"
+                                                                    data-bs-dismiss="modal"
+                                                                    class="btn-close"
+                                                                    aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="row d-flex justify-content-center">
+                                                                <div class="col-md-6">
 
-                                                <!-- modal edit-->
-                                                <div class="modal" tabindex="-1"
-                                                     th:id="${'modalEdit'+ user.getId()}">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <form class="align-self-center" th:method="PATCH"
-                                                              th:action="@{/admin/{id}/edit(id=${user.getId()})}"
-                                                              th:object="${user}">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title"
-                                                                        id="modalVerticallyCenteredLabel">Edit user</h5>
-                                                                    <button type="button"
-                                                                            data-bs-dismiss="modal"
-                                                                            class="btn-close"
-                                                                            aria-label="Close"></button>
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="id-edit-user">
+                                                                            <b>ID</b>
+                                                                            <input class="form-control"
+                                                                                   type="number"
+                                                                                   name="id_edit"
+                                                                                   id="id-edit-user"
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="firstname-edit-user">
+                                                                            <b>First name</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="username_edit"
+                                                                                   id="firstname-edit-user"
+                                                                                   placeholder="First name"
+                                                                                   required
+                                                                                   minlength="2"
+                                                                                   maxlength="20">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="lastname-edit-user">
+                                                                            <b>Last name</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="lastname_edit"
+                                                                                   id="lastname-edit-user"
+                                                                                   placeholder="Last name"
+                                                                                   required>
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="age-edit-user">
+                                                                            <b>Age</b>
+                                                                            <input class="form-control"
+                                                                                   type="number"
+                                                                                   name="age_edit"
+                                                                                   id="age-edit-user"
+                                                                                   placeholder="Age"
+                                                                                   required>
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="email-edit-user">
+                                                                            <b>Email</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="email_edit"
+                                                                                   id="email-edit-user"
+                                                                                   placeholder="Email"
+                                                                                   required>
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="password-edit-user">
+                                                                            <b>Password</b>
+                                                                            <input type="password"
+                                                                                   class="form-control"
+                                                                                   name="password_edit"
+                                                                                   id="password-edit-user"
+                                                                                   minlength="3"
+                                                                                   maxlength="20"
+                                                                                   required>
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label for="role-edit-user"
+                                                                               class="text-center w-100">
+                                                                            <b>Role</b>
+                                                                            <select class="form-select form-control"
+                                                                                    type="text"
+                                                                                    id="role-edit-user"
+                                                                                    name="role_edit">
+                                                                                <option value="ROLE_USER">USER
+                                                                                </option>
+                                                                                <option value="ROLE_ADMIN">
+                                                                                    ADMIN
+                                                                                </option>
+                                                                            </select>
+                                                                        </label>
+                                                                    </p>
+
                                                                 </div>
-                                                                <div class="modal-body">
-                                                                    <div class="row d-flex justify-content-center">
-                                                                        <div class="col-md-6">
 
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="id-edit-user">
-                                                                                    <b>ID</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="number"
-                                                                                           th:name="id"
-                                                                                           id="id-edit-user"
-                                                                                           th:value="${user.id}"
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                            class="btn btn-secondary"
+                                                                            data-bs-dismiss="modal">Close
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            id="button_edit"
+                                                                            data-bs-dismiss="modal"
+                                                                            class="btn btn-primary">
+                                                                        Edit
 
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="firstname-edit-user">
-                                                                                    <b>First name</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="username"
-                                                                                           id="firstname-edit-user"
-                                                                                           placeholder="First name"
-                                                                                           th:value="${user.username}"
-                                                                                           required
-                                                                                           minlength="2"
-                                                                                           maxlength="20">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="lastname-edit-user">
-                                                                                    <b>Last name</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="lastname"
-                                                                                           id="lastname-edit-user"
-                                                                                           placeholder="Last name"
-                                                                                           th:value="${user.lastname}"
-                                                                                           required>
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="age-edit-user">
-                                                                                    <b>Age</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="number"
-                                                                                           th:name="age"
-                                                                                           id="age-edit-user"
-                                                                                           placeholder="Age"
-                                                                                           th:value="${user.age}"
-                                                                                           required>
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="email-edit-user">
-                                                                                    <b>Email</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="email"
-                                                                                           id="email-edit-user"
-                                                                                           placeholder="Email"
-                                                                                           th:value="${user.email}"
-                                                                                           required>
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="password-edit-user">
-                                                                                    <b>Password</b>
-                                                                                    <input type="password"
-                                                                                           class="form-control"
-                                                                                           name="password"
-                                                                                           id="password-edit-user"
-                                                                                           minlength="3"
-                                                                                           maxlength="20"
-                                                                                           required>
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label for="role-edit-user"
-                                                                                       class="text-center w-100">
-                                                                                    <b>Role</b>
-                                                                                    <select class="form-select form-control"
-                                                                                            th:type="text"
-                                                                                            id="role-edit-user"
-                                                                                            th:field="*{roles}">
-                                                                                        <option value="ROLE_USER">USER
-                                                                                        </option>
-                                                                                        <option value="ROLE_ADMIN">
-                                                                                            ADMIN
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </label>
-                                                                            </p>
-
-                                                                        </div>
-
-                                                                        <div class="modal-footer">
-                                                                            <button type="button"
-                                                                                    class="btn btn-secondary"
-                                                                                    data-bs-dismiss="modal">Close
-                                                                            </button>
-                                                                            <button type="submit"
-                                                                                    class="btn btn-primary">Edit
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
+                                                                    </button>
                                                                 </div>
                                                             </div>
-                                                        </form>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <!--------------------------------------------- delete edit------------------------------------------------------------>
+                                            <div class="modal" tabindex="-1"
+                                                 id="modalDelete">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title"
+                                                                id="modalVerticallyCenteredLabel_delete">Delete
+                                                                user</h5>
+                                                            <button type="button"
+                                                                    data-bs-dismiss="modal"
+                                                                    class="btn-close"
+                                                                    aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="row d-flex justify-content-center">
+                                                                <div class="col-md-6">
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="id-delete-user">
+                                                                            <b>ID</b>
+                                                                            <input class="form-control"
+                                                                                   type="number"
+                                                                                   name="id_delete"
+                                                                                   id="id-delete-user"
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
 
-                                                <!-- delete edit-->
-                                                <div class="modal" tabindex="-1"
-                                                     th:id="${'modalDelete'+ user.getId()}">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <form class="align-self-center" th:method="DELETE"
-                                                              th:action="@{/admin/{id}(id=${user.getId()})}"
-                                                              th:object="${user}">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title"
-                                                                        id="modalVerticallyCenteredLabel_delete">Delete
-                                                                        user</h5>
-                                                                    <button type="button"
-                                                                            data-bs-dismiss="modal"
-                                                                            class="btn-close"
-                                                                            aria-label="Close"></button>
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="firstname-delete-user">
+                                                                            <b>First name</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="username_delete"
+                                                                                   id="firstname-delete-user"
+                                                                                   placeholder="First name"
+                                                                                   value=""
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="lastname-delete-user">
+                                                                            <b>Last name</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="lastname_delete"
+                                                                                   id="lastname-delete-user"
+                                                                                   placeholder="Last name"
+                                                                                   value=""
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="age-delete-user">
+                                                                            <b>Age</b>
+                                                                            <input class="form-control"
+                                                                                   type="number"
+                                                                                   name="age_delete"
+                                                                                   id="age-delete-user"
+                                                                                   placeholder="Age"
+                                                                                   value=""
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="email-delete-user">
+                                                                            <b>Email</b>
+                                                                            <input class="form-control"
+                                                                                   type="text"
+                                                                                   name="email_delete"
+                                                                                   id="email-delete-user"
+                                                                                   placeholder="Email"
+                                                                                   value=""
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label class="text-center"
+                                                                               for="role-delete-user">
+                                                                            <b>Role</b>
+                                                                            <input type="text"
+                                                                                   class="form-control"
+                                                                                   name="role_delete"
+                                                                                   id="role-delete-user"
+                                                                                   required
+                                                                                   disabled="disabled">
+                                                                        </label>
+                                                                    </p>
                                                                 </div>
-                                                                <div class="modal-body">
-                                                                    <div class="row d-flex justify-content-center">
-                                                                        <div class="col-md-6">
 
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="id-delete-user">
-                                                                                    <b>ID</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="number"
-                                                                                           th:name="id"
-                                                                                           id="id-delete-user"
-                                                                                           th:value="${user.id}"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="firstname-delete-user">
-                                                                                    <b>First name</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="username"
-                                                                                           id="firstname-delete-user"
-                                                                                           placeholder="First name"
-                                                                                           th:value="${user.username}"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="lastname-delete-user">
-                                                                                    <b>Last name</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="lastname"
-                                                                                           id="lastname-delete-user"
-                                                                                           placeholder="Last name"
-                                                                                           th:value="${user.lastname}"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="age-delete-user">
-                                                                                    <b>Age</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="number"
-                                                                                           th:name="age"
-                                                                                           id="age-delete-user"
-                                                                                           placeholder="Age"
-                                                                                           th:value="${user.age}"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="email-delete-user">
-                                                                                    <b>Email</b>
-                                                                                    <input class="form-control"
-                                                                                           th:type="text"
-                                                                                           th:name="email"
-                                                                                           id="email-delete-user"
-                                                                                           placeholder="Email"
-                                                                                           th:value="${user.email}"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="password-delete-user">
-                                                                                    <b>Password</b>
-                                                                                    <input type="password"
-                                                                                           class="form-control"
-                                                                                           name="password"
-                                                                                           id="password-delete-user"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                            <p>
-                                                                                <label class="text-center"
-                                                                                       for="role-delete-user">
-                                                                                    <b>Role</b>
-                                                                                    <input th:type="text"
-                                                                                           class="form-control"
-                                                                                           th:name="role"
-                                                                                           th:value="${user.getRolesName()}"
-                                                                                           id="role-delete-user"
-                                                                                           required
-                                                                                           disabled="disabled">
-                                                                                </label>
-                                                                            </p>
-
-                                                                        </div>
-
-                                                                        <div class="modal-footer">
-                                                                            <button type="button"
-                                                                                    class="btn btn-secondary"
-                                                                                    data-bs-dismiss="modal">Close
-                                                                            </button>
-                                                                            <button type="submit"
-                                                                                    class="btn btn-primary">Delete
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                            class="btn btn-secondary"
+                                                                            data-bs-dismiss="modal">Close
+                                                                    </button>
+                                                                    <button
+                                                                            type="button"
+                                                                            data-bs-dismiss="modal"
+                                                                            class="btn btn-primary"
+                                                                            id="button_delete">
+                                                                        Delete
+                                                                    </button>
                                                                 </div>
                                                             </div>
-                                                        </form>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -392,7 +348,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- create user-->
+
+                            <!--------------------------create user----------------------------------------------------->
                             <div class="tab-pane fade" id="nav-profile" role="tabpanel"
                                  aria-labelledby="nav-profile-tab">
                                 <div class="card">
@@ -404,55 +361,53 @@
                                     <div class="card-body">
                                         <div class="row d-flex justify-content-center">
                                             <div class="col-md-4">
-                                                <form class="align-self-center" th:method="POST"
-                                                      th:action="@{/admin}" th:object="${newUser}">
-
-                                                    <label for="firstname" class="form-label"><b>First
-                                                        name</b></label>
-                                                    <input type="text" th:field="*{username}"
+                                                <form id="form_create_user" class="align-self-center" method="POST">
+                                                    <label for="create_firstname" class="form-label"><b>First
+                                                        name </b></label>
+                                                    <input type="text" field=""
                                                            class="form-control"
-                                                           id="firstname"
+                                                           id="create_firstname"
                                                            placeholder="First name"/>
 
-                                                    <label for="lastname" class="form-label"><b>Last
+                                                    <label for="create_lastname" class="form-label"><b>Last
                                                         name</b></label>
-                                                    <input type="text" th:field="*{lastname}"
+                                                    <input type="text" field=""
                                                            class="form-control"
-                                                           id="lastname"
+                                                           id="create_lastname"
                                                            placeholder="Last name"/>
 
-                                                    <label for="age" class="form-label"><b>Age</b></label>
-                                                    <input type="number" th:field="*{age}"
+                                                    <label for="create_age" class="form-label"><b>Age</b></label>
+                                                    <input type="number" field=""
                                                            class="form-control"
-                                                           id="age"
+                                                           id="create_age"
                                                            placeholder="age"/>
 
-                                                    <label for="email" class="form-label"><b>Email</b></label>
-                                                    <input type="email" th:field="*{email}" class="form-control"
-                                                           id="email"
+                                                    <label for="create_email" class="form-label"><b>Email</b></label>
+                                                    <input type="email" field="" class="form-control"
+                                                           id="create_email"
                                                            placeholder="Email"/>
 
-                                                    <label for="password" class="form-label"><b>Password</b></label>
-                                                    <input type="password" th:field="*{password}"
-                                                           class="form-control" id="password"
+                                                    <label for="create_password"
+                                                           class="form-label"><b>Password</b></label>
+                                                    <input type="password" field=""
+                                                           class="form-control" id="create_password"
                                                            placeholder="Password"/>
 
-                                                    <label for="role" class="form-label"><b>Role</b></label>
-                                                    <select class="form-select" th:field="*{roles}"
+                                                    <label for="create_role" class="form-label"><b>Role</b></label>
+                                                    <select class="form-select" field=""
                                                             aria-label="Default select"
-                                                            id="role">
+                                                            id="create_role">
                                                         <option value="ROLE_USER">USER</option>
                                                         <option value="ROLE_ADMIN">ADMIN</option>
                                                     </select>
 
                                                     <div class="row justify-content-center pt-3">
                                                         <div class="col-auto">
-                                                            <button type="submit" id="new-user" class="btn btn-success">
-                                                                Add new user
-                                                            </button>
+                                                            <input type="submit" id="create_new-user"
+                                                                   class="btn btn-success"
+                                                                   text="Add new user">
                                                         </div>
                                                     </div>
-
                                                 </form>
                                             </div>
                                         </div>
@@ -467,8 +422,208 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-Token': $('meta[name="_csrf"]').attr('content')
+            }
+        });
+
+        $.get('api/user', function (user) {
+            $('#navbar-username').text(user.email);
+        })
+            .done(function () {
+                console.log('Выполнено!');
+            })
+            .fail(function () {
+                console.log('Ошибка запроса!');
+            });
+
+        let my_users = [];
+
+        function updateUsersTable() {
+            $.get('api/admin/users', function (users, httpStatus) {
+                $.each(users, function (index, user) {
+                    my_users.push(user)
+                    let row = $("<tr />");
+                    $("<td id='td_id' />").html(user.id).appendTo(row);
+                    $("<td id='td_username' />").html(user.username).appendTo(row);
+                    $("<td  id='td_lastname'/>").html(user.lastname).appendTo(row);
+                    $("<td id='td_age' />").html(user.age).appendTo(row);
+                    $("<td id='td_email' />").html(user.email).appendTo(row);
+                    $("<td id='td_rolesName' />").html(user.rolesName).appendTo(row);
+
+                    const $cellEdit = $('<td></td>');
+                    const $cellDelete = $('<td></td>');
+
+                    const $buttonEdit = $('<button></button>')
+                        .addClass('btn btn-info')
+                        .text('Edit')
+                        .attr({
+                            "style": "color:white",
+                            "id": "edit_button" + user.id,
+                            "data-bs-toggle": "modal",
+                            "data-bs-target": "#modalEdit",
+                            "user-id": user.id
+                        });
+                    $cellEdit.append($buttonEdit).appendTo(row);
+
+                    const $buttonDelete = $('<button></button>')
+                        .addClass("btn btn-danger")
+                        .text('Delete')
+                        .attr({
+                            "id": "delete_button" + user.id,
+                            "data-bs-toggle": "modal",
+                            "data-bs-target": "#modalDelete",
+                            "user-id": user.id
+                        });
+                    $cellDelete.append($buttonDelete).appendTo(row);
+
+                    row.appendTo($("#id-tbody-users"))
+                });
+            });
+        }
+
+        updateUsersTable();
+        console.log(my_users);
+        let deleteUser;
+        $(document).on('click', '.btn.btn-danger', function () {
+            let $tr = $(this).closest('tr');
+            let id = $tr.find("#td_id").text();
+            let username = $tr.find("#td_username").text();
+            let lastname = $tr.find("#td_lastname").text();
+            let age = $tr.find("#td_age").text();
+            let email = $tr.find("#td_email").text();
+            let role = $tr.find("#td_rolesName").text();
+            deleteUser = id;
+            console.log("deleteUserId" + id);
+            $('#modalDelete input[name="id_delete"]').val(id);
+            $('#modalDelete input[name="username_delete"]').val(username);
+            $('#modalDelete input[name="lastname_delete"]').val(lastname);
+            $('#modalDelete input[name="age_delete"]').val(age);
+            $('#modalDelete input[name="email_delete"]').val(email);
+            $('#modalDelete input[name="role_delete"]').val(role);
+
+            $('#modalDelete').attr(
+                {
+                    "action": "api/admin/delete/" + id
+                }
+            )
+        });
+        let editUser
+        let editId
+        $(document).on('click', '.btn.btn-info', function () {
+            let $tr = $(this).closest('tr');
+            let id = $tr.find("#td_id").text();
+            editId = id;
+            $('#modalEdit input[name="id_edit"]').val(id);
+            $('#modalEdit').attr(
+                {
+                    "action": "api/admin/edit/" + id
+                }
+            )
+
+        })
+        $("#button_edit").on('click', function () {
+            editUser = {
+                'username': $('#modalEdit input[name="username_edit"]').val(),
+                'lastname': $('#modalEdit input[name="lastname_edit"]').val(),
+                'email': $('#modalEdit input[name="email_edit"]').val(),
+                'age': $('#modalEdit input[name="age_edit"]').val(),
+                'password': $('#modalEdit input[name="password_edit"]').val(),
+                'roles': [{
+                    role: $('#modalEdit select[name="role_edit"]').val()
+                }]
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: 'api/admin/edit/' + editId,
+                data: JSON.stringify(editUser),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (response) {
+                    $('.table.table-striped').find('#id-tbody-users').empty();
+                    updateUsersTable();
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+
+        });
+        $("#button_delete").on('click', function () {
+                $.ajax({
+                    type: 'POST',
+                    url: 'api/admin/delete/' + deleteUser,
+                    success: function (response) {
+                        $('.table.table-striped').find('#id-tbody-users').empty();
+                        updateUsersTable();
+                        //$('.modal').hide();
+
+                        console.log(response);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        );
+        $.get('api/user/rolesString', function (rolesString) {
+            $('#navbar-roles').text(rolesString)
+        })
+            .done(function () {
+                //TODO
+            })
+            .fail(function () {
+                //TODO
+            });
+        $('#form_create_user').submit(function (event) {
+            event.preventDefault();
+            const firstname = $('#create_firstname').val();
+            const email = $('#create_email').val();
+            const password = $('#create_password').val();
+            const age = $('#create_age').val();
+            const lastname = $('#create_lastname').val();
+            const role = $('#create_role').val();
+
+            let user = {
+                'username': firstname,
+                'lastname': lastname,
+                'email': email,
+                'age': age,
+                'password': password,
+                'roles': [
+                    {'role': role}
+                ],
+            };
+            $.ajax({
+                type: 'POST',
+                url: 'api/admin/create',
+                data: JSON.stringify(user),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (response) {
+                    $('.table.table-striped').find('#id-tbody-users').empty();
+                    updateUsersTable();
+                    $('#nav-home-tab').tab('show');
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        });
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+
 </body>
 </html>

@@ -1,4 +1,5 @@
 package ru.kata.spring.boot_security.demo.service;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-public class UserServiceImp implements  UserService  {
+public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
 
     public UserServiceImp(UserRepository userRepository) {
@@ -30,13 +31,18 @@ public class UserServiceImp implements  UserService  {
     }
 
     @Override
+    @Transactional
     public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) throw new UsernameNotFoundException("User not found");
+        user.get().getAuthorities();
+        return user;
     }
 
     @Override
     @Transactional
     public void save(User user) {
+        user.getId();
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
@@ -58,8 +64,8 @@ public class UserServiceImp implements  UserService  {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
-        if (user.isEmpty())
-            throw new UsernameNotFoundException("User not found");
+        if (user.isEmpty()) throw new UsernameNotFoundException("User not found");
+        user.get().getAuthorities();
         return user.get();
     }
 }

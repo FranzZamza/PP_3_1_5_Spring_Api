@@ -5,17 +5,18 @@
     <title>Spring Security Example</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body class="bg-light">
 
-<nav class="navbar sticky-top navbar-dark bg-dark">
+<nav class="navbar sticky-top navbar-dark bg-dark" id="navbar">
     <div class="container-fluid">
         <row class="d-flex flex-wrap align-items-center">
             <b>
-                <a class="navbar-brand" href="/user"
-                   th:text="${user.getEmail()}"/>
+                <a id="navbar-username" class="navbar-brand" href="/user">
+                </a>
             </b>
-            <div class="navbar-brand" th:text="'with roles: ' + ${user.getRolesName()}"></div>
+            <div id="navbar-roles" class="navbar-brand"></div>
         </row>
         <form th:action="@{/logout}" method="post" class="me-0">
             <input class="btn btn-outline-secondary  border-0 outline-0" type="submit" value="Logout"/>
@@ -28,18 +29,18 @@
         <div class="row g-0 w-100 mt-3">
 
             <div class="col-2 min-vh-100 bg-white">
-                <div th:if="${user.getRoles().size()>=2}" class="nav flex-column nav-pills" id="v-pills-tab-admin"
+                <div class="nav flex-column nav-pills" id="v-pills-tab-admin"
                      role="tablist"
                      aria-orientation="vertical">
                     <a class="nav-link" id="v-pills-admin-tab"
-                       th:href="@{/admin}" role="tab"
+                       href="/admin" role="tab"
                        aria-controls="v-pills-tab-admin" aria-selected="false">Admin</a>
                 </div>
 
                 <div class="nav flex-column nav-pills" id="user-v-pills-tab" role="tablist"
                      aria-orientation="vertical">
                     <a class="nav-link active" id="v-pills-user-tab"
-                       th:href="@{/user}" role="tab"
+                       href="/user" role="tab"
                        aria-controls="user-v-pills-tab" aria-selected="true">User</a>
                 </div>
             </div>
@@ -72,12 +73,12 @@
                                         </thead>
                                         <tbody>
                                         <tr>
-                                            <td th:text="${user.getId()}"/>
-                                            <td th:text="${user.getUsername()}"/>
-                                            <td th:text="${user.getLastname()}"/>
-                                            <td th:text="${user.getAge()}"/>
-                                            <td th:text="${user.getEmail()}"/>
-                                            <td th:text="${user.getRolesName()}"/>
+                                            <td id="td_id"></td>
+                                            <td id="td_username"></td>
+                                            <td id="td_lastname"></td>
+                                            <td id="td_age"></td>
+                                            <td id="td_email"></td>
+                                            <td id="td_roles"></td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -93,6 +94,37 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        $.get('api/user', function (user) {
+            $('#navbar-username').text(user.email);
+            $('#td_id').text(user.id);
+            $('#td_username').text(user.username);
+            $('#td_lastname').text(user.lastname);
+            $('#td_age').text(user.age);
+            $('#td_email').text(user.email);
+        })  .done(function () {
+                //TODO
+                console.log('Выполнено!');
+            })
+            .fail(function () {
+                //TODO
+                console.log('Ошибка запроса!');
+            });
+
+        $.get('api/user/rolesString', function (rolesString) {
+            $('#navbar-roles').text(rolesString)
+            $('#td_roles').text(rolesString);
+            if (rolesString.indexOf("ADMIN") === -1) {
+                $('#v-pills-tab-admin').hide()
+            }
+        })
+            .done(function () {
+            })
+            .fail(function () {
+                //TODO
+            })
+    });
+</script>
 </body>
 </html>
-

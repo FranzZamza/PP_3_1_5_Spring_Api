@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +21,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -41,12 +44,12 @@ public class User implements UserDetails {
     @NotEmpty(message = "password is empty!")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
+    @JsonBackReference
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    @Fetch(FetchMode.JOIN)
+    @Fetch(FetchMode.SELECT)
     private Collection<Role> roles;
 
     public User() {
@@ -61,12 +64,20 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return mapRolesToAuthorities(getRoles());
+    public User(String email, String username, String lastname, Integer age, String password) {
+        this.email = email;
+        this.username = username;
+        this.lastname = lastname;
+        this.age = age;
+        this.password = password;
     }
 
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return mapRolesToAuthorities();
+    }
+
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities() {
         return roles
                 .stream()
                 .map(x -> new SimpleGrantedAuthority(x.getRole()))
@@ -74,7 +85,7 @@ public class User implements UserDetails {
     }
 
     public String getRolesName() {
-        return mapRolesToAuthorities(roles)
+        return mapRolesToAuthorities()
                 .stream()
                 .map(Object::toString)
                 .map(x -> x.replaceAll("ROLE_", ""))
