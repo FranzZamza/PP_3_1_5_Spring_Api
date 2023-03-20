@@ -103,15 +103,7 @@
             $('#td_lastname').text(user.lastname);
             $('#td_age').text(user.age);
             $('#td_email').text(user.email);
-        })  .done(function () {
-                //TODO
-                console.log('Выполнено!');
-            })
-            .fail(function () {
-                //TODO
-                console.log('Ошибка запроса!');
-            });
-
+        })
         $.get('api/user/rolesString', function (rolesString) {
             $('#navbar-roles').text(rolesString)
             $('#td_roles').text(rolesString);
@@ -119,11 +111,6 @@
                 $('#v-pills-tab-admin').hide()
             }
         })
-            .done(function () {
-            })
-            .fail(function () {
-                //TODO
-            })
     });
 </script>
 </body>
